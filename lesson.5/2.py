@@ -2,7 +2,8 @@ from pycat.base.base_sprite import RotationMode
 from pycat.core import Window, KeyCode,Scheduler
 from pycat.sprite import Sprite
 from random import randint, choice
-from pyglet.window.key import DELETE, S
+from math import sin, cos, tan, acos, asin, atan, atan2, pi
+
 window=Window(1500,800,background_image='img/beach_03.png')
 class Player(Sprite):
     def on_create(self):
