@@ -1,4 +1,3 @@
-from os import close
 from pycat.core import Color, KeyCode, Sprite, Window, Scheduler
 from random import randint
 
