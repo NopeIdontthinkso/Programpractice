@@ -41,8 +41,9 @@ class Player(Sprite):
             self.x -= self.speed
         if window.is_key_pressed(KeyCode.D):
             self.x += self.speed
-        if self.hp <= 1:
-            window.create_label(End, x=window.width/2, y=window.height/2, font_size=100)
+        if self.hp < 1:
+            window.create_label(End, x=300, y=400, font_size=100)
+            self.delete()
     
     def on_left_click_anywhere(self):
         b = window.create_sprite(Bullet, position=self.position)
@@ -59,6 +60,8 @@ class Bullet(Sprite):
         self.move_forward(30)
         if self.is_touching_window_edge():
             self.delete()
+        if player.hp <= 1:
+            self.delete()
 
 class EnemyBullet(Sprite):
 
@@ -72,6 +75,8 @@ class EnemyBullet(Sprite):
             self.delete()
         if self.is_touching_sprite(player):
             player.hp -= 1 
+            self.delete()
+        if player.hp < 1:
             self.delete()
 
 class Enemy(Sprite):
@@ -104,11 +109,13 @@ class Enemy(Sprite):
                 b.delete()
             player.score += 1 
             self.delete()
-        
+        if player.hp < 1:
+            self.delete()
         
         
 def create_enemy(dt):
-    window.create_sprite(Enemy)
+    if player.hp >= 1:
+        window.create_sprite(Enemy)
 player = window.create_sprite(Player)
 Scheduler.update(create_enemy, 2)
 window.create_label(Hp)
