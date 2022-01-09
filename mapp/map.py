@@ -53,7 +53,7 @@ class Character(Sprite):
         if self.x >= window.width:
             r = nextroom(self.room, 'right')
             if r == self.room:
-                self.y = window.width-1
+                self.x = window.width-1
             else:
                 self.x = 1
                 self.room = r
