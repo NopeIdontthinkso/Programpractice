@@ -1,7 +1,29 @@
-from turtle import width
-from pycat.core import Window,Sprite,Color,KeyCode
+from pickle import TRUE
+from random import randint
+from pycat.core import Window,Sprite,Color,KeyCode,Label,Scheduler
 
 window = Window(width = 1002 ,height= 1002)
+
+class Hp(Label):
+
+    def on_create(self):
+        self.layer = 3
+    
+    def on_update(self, dt: float):
+        self.text = 'Hp: '+str(player.hp)
+
+class Score(Label):
+
+    def on_create(self):
+        self.layer = 3
+
+    def on_update(self, dt: float):
+        self.text = 'Score: '+str(player.score)
+
+class End(Label):
+
+    def on_create(self):
+        self.text = 'YOU LOST'
 
 def nextroom(room , dir):
 
@@ -24,17 +46,19 @@ def nextroom(room , dir):
     elif room == 9:
         return {'left': 8, 'right': room, 'up' : 6, 'down': room}[dir]
 
-
 class Character(Sprite):
 
     def on_create(self):
         self.color = Color.AMBER
         self.scale = 30
-        self.speed = 10
+        self.speed = 5
         self.x = window.width/2
         self.y = window.height/2
         self.room = 5
         self.layer = 2
+        self.hp = 5
+        self.score = 0
+
 
     def on_update(self, dt):
         if self.y >= window.height:
@@ -119,26 +143,113 @@ class Character(Sprite):
             for i in range(9):
                 walls[i].is_visible = visibility[i]
 
+        if self.hp < 1:
+            window.create_label(End, x=150, y=600, font_size=100)
+            self.delete()
 
-class Map(Sprite):
-
-    def on_create(self):
-        self.x = window.width/2
-        self.y = window.height/2
-    
-    def on_update(self, dt):
-        self.image = str(player.room) + '.jpg'
+    def on_left_click_anywhere(self):
+        b = window.create_sprite(Bullet, position=self.position)
+        b.point_toward_mouse_cursor()
 
 class Wall(Sprite):
 
     def on_create(self):
-        self.color = Color.CYAN
+        self.color = Color.AZURE
         self.scale = window.width/3
         self.layer = 2
         self.add_tag('wall')
 
+    def on_update(self, dt):
+        if player.hp < 1:
+            self.delete()
+
+class Bullet(Sprite):
+
+    def on_create(self):
+        self.color = Color.AMBER
+        self.scale = 10
+        self.add_tag('Bullet')
+        self.room = player.room
+    
+    def on_update(self, dt):
+        if player.room == self.room:
+            self.is_visible = TRUE
+        else:
+            self.is_visible = False
+        self.move_forward(30)
+        if self.is_touching_window_edge():
+            self.delete()
+        if self.is_touching_any_sprite_with_tag('wall'):
+            self.delete()
+        if player.hp < 1:
+            self.delete()
+
+class Enemy(Sprite):
+
+    def on_create(self):
+        self.color = Color.RED
+        self.scale = 30
+        self.speed = 3
+        self.time = 0
+        self.add_tag('Enemy')
+        self.room = randint(1,9)
+        if player.room == self.room:
+            self.is_visible = TRUE
+        else:
+            self.is_visible = False
+            self.y = randint(window.height/3+30,(window.height*2)/3-30)
+            self.x = randint(window.width/3+30,(window.width*2/3)-30)
+        if self.is_touching_any_sprite_with_tag('wall'):
+            window.create_sprite(Enemy)
+            self.delete()
+        self.point_toward_sprite(player)
+
+    def on_update(self, dt):
+        if player.room == self.room:
+            self.is_visible = TRUE
+        else:
+            self.is_visible = False
+        if self.is_visible == TRUE:
+            self.time += dt
+            if self.time >= 1:
+                window.create_sprite(EnemyBullet, position=self.position).point_toward_sprite(player)
+                self.time = 0
+            self.move_forward(self.speed)
+            if self.is_touching_window_edge() or self.is_touching_any_sprite_with_tag('wall'):
+                self.rotation -= 90
+                
+            if self.is_touching_any_sprite_with_tag('Bullet'):
+                for b in self.get_touching_sprites_with_tag("Bullet"):
+                    b.delete()
+                player.score += 1 
+                self.delete()
+        if player.hp < 1:
+            self.delete()
+
+class EnemyBullet(Sprite):
+
+    def on_create(self):
+        self.color = Color.RED
+        self.scale = 10
+        self.room = player.room
+    
+    def on_update(self, dt):
+        if player.room == self.room:
+            self.is_visible = TRUE
+        else:
+            self.is_visible = False
+        self.move_forward(30)
+        if self.is_touching_window_edge():
+            self.delete()
+        if self.is_touching_any_sprite_with_tag("wall"):
+            self.delete()
+        if self.is_touching_sprite(player):
+            player.hp -= 1 
+            self.delete()
+        if player.hp < 1:
+            self.delete()
+
 player = window.create_sprite(Character)
-map = window.create_sprite(Map)
 
 w1 = window.create_sprite(Wall, x=window.width/6, y=(window.height*5)/6)
 w2 = window.create_sprite(Wall, x=(window.width*3)/6, y=(window.height*5)/6)
@@ -151,6 +262,13 @@ w8 = window.create_sprite(Wall, x=(window.width*3)/6, y=window.height/6)
 w9 = window.create_sprite(Wall, x=(window.width*5)/6, y=window.height/6)
 
 walls = [w1, w2, w3, w4, w5, w6, w7, w8, w9]
+
+window.create_label(Hp)
+window.create_label(Score, y=980)
+def create_enemy(dt):
+    if player.hp >= 1:
+        window.create_sprite(Enemy)
+Scheduler.update(create_enemy, 4)
 
 window.run()
         
