@@ -1,4 +1,3 @@
-from pickle import TRUE
 from random import randint
 from pycat.core import Window,Sprite,Color,KeyCode,Label,Scheduler
 
@@ -173,7 +172,7 @@ class Bullet(Sprite):
     
     def on_update(self, dt):
         if player.room == self.room:
-            self.is_visible = TRUE
+            self.is_visible = True
         else:
             self.is_visible = False
         self.move_forward(30)
@@ -194,7 +193,7 @@ class Enemy(Sprite):
         self.add_tag('Enemy')
         self.room = randint(1,9)
         if player.room == self.room:
-            self.is_visible = TRUE
+            self.is_visible = True
         else:
             self.is_visible = False
             self.y = randint(window.height/3+30,(window.height*2)/3-30)
@@ -206,10 +205,10 @@ class Enemy(Sprite):
 
     def on_update(self, dt):
         if player.room == self.room:
-            self.is_visible = TRUE
+            self.is_visible = True
         else:
             self.is_visible = False
-        if self.is_visible == TRUE:
+        if self.is_visible == True:
             self.time += dt
             if self.time >= 1:
                 window.create_sprite(EnemyBullet, position=self.position).point_toward_sprite(player)
@@ -235,7 +234,7 @@ class EnemyBullet(Sprite):
     
     def on_update(self, dt):
         if player.room == self.room:
-            self.is_visible = TRUE
+            self.is_visible = True
         else:
             self.is_visible = False
         self.move_forward(30)
