@@ -31,6 +31,8 @@ class Bird(Sprite):
         self.fall = 0
 
     def on_update(self, dt):
+        if w.is_key_down(KeyCode._1):
+            w.save_screen_shot("img.png")
         self.y -= self.fall
         if self.fall <= 3.5/b:
             self.fall +=0.525/b
