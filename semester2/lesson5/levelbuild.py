@@ -5,8 +5,7 @@ def levelbuild(level:List[str], level_d:Dict[str,str], cell_size:int, x0:int, y0
     class Cell(Sprite):
 
         def on_create(self):
-            if self.image == 'tiles/tile_012.png':
-                self.add_tag(tag)
+            self.add_tag(tag)
 
         def on_left_click(self):
             print(self.image)
