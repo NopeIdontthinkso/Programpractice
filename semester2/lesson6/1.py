@@ -1,5 +1,3 @@
-from re import A
-from venv import create
 from pycat.core import Window,Sprite,Color,Label
 from typing import List
 from random import randint,choice
@@ -59,7 +57,7 @@ for i in range(M):
         m.append(c)
     grid.append(m)
 
-for i in range(5):
+for i in range(8):
     choice(choice(grid)).on_left_click()
 w.run()
 
