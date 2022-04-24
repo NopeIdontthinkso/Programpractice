@@ -1,4 +1,4 @@
-from pycat.core import Window, Sprite, Color, KeyCode
+from pycat.core import Window, Sprite, Color, KeyCode, Scheduler
 from random import choice
 
 
@@ -99,9 +99,15 @@ def key(key: KeyCode):
                     i.is_visible = True
                 if red != 4:
                     print('you lose')
-                    
-                    
+
+
+def auto_guess():
+    print('guess')
+    Scheduler.wait(1, auto_guess)
+
+
 code = SecretCode()
 ColorChooser()
 guess = Guess()
+Scheduler.wait(1, auto_guess)
 w.run(on_key_press=key)
