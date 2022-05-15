@@ -18,8 +18,8 @@ print(str(sum(l1))+ ':' + str(sum(l2)))
 print(str(sum(l3))+ ':' + str(sum(l4)))
 
 if a > 0:
-    print('win')
+    print('Win')
 elif a < 0:
-    print('lose')
+    print('Lose')
 else:
-    print('tie')
+    print('Tie')

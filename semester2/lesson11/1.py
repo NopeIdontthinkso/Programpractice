@@ -1,10 +1,14 @@
 from pycat.core import Window, Sprite, Color, Scheduler, Label
 from enum import Enum, auto
 from random import choice, randint
+from os.path import dirname
 
 
 w = Window()
 point = 0
+best_score = 0
+with open(dirname(__file__) + '/best_score.txt', 'r') as file:
+    best_score = int(file.readline())
 
 
 class Group(Enum):
@@ -19,23 +23,36 @@ class Group(Enum):
             return 'VERB'
         if self is Group.ADJECTIVES:
             return 'ADJECTIVE'
+
+
 words = dict()
-words[Group.NOUNS] = ['cat', 'dog']
-words[Group.VERBS] =  ['run', 'hop']
-words[Group.ADJECTIVES] = ['bad', 'good']
+with open(dirname(__file__) + '/noun.txt', 'r') as file:
+    words[Group.NOUNS] = [w.strip() for w in file.readlines()]
+with open(dirname(__file__) + '/verb.txt', 'r') as file:
+    words[Group.VERBS] =  [w.strip() for w in file.readlines()]
+with open(dirname(__file__) + '/adjective.txt', 'r') as file:
+    words[Group.ADJECTIVES] = [w.strip() for w in file.readlines()]
 point_type = choice(list(words))
 
 
 class Point(Label):
 
     def on_update(self, dt):
-        self.text = 'point:' + str(point)
+        self.text = 'Point:' + str(point)
 class PointType(Label):
 
     def on_create(self):
-        self.x = a.y - self.content_height
+        self.text = 'Point Type:' + str(point_type)
+        self.y = a.y - self.content_height
     def on_update(self, dt):
-        self.text = 'point_type:' + str(point_type)
+        self.text = 'Point Type:' + str(point_type)
+class BestScore(Label):
+
+    def on_create(self):
+        self.text = 'Best Score:' + str(best_score)
+        self.y = b.y - self.content_height
+    def on_update(self, dt):
+        self.text = 'Best Score:' + str(best_score)
 
 
 class Word(Sprite):
@@ -59,8 +76,13 @@ class Word(Sprite):
     def on_left_click(self):
         global point
         global point_type
+        global best_score
         if self.type is point_type:
             point += 1
+            if point > best_score:
+                with open(dirname(__file__) + '/best_score.txt', 'w') as file:
+                    best_score = point
+                    file.write(str(best_score))
         else:
             point -= 1
         self.delete()
@@ -76,6 +98,7 @@ def create_word():
 Scheduler.update(create_word, 1/2)
 a = w.create_label(Point)
 b = w.create_label(PointType)
+c = w.create_label(BestScore)
 
 
 w.run()
