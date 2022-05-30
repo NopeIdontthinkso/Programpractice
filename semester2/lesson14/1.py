@@ -1,4 +1,3 @@
-from turtle import position
 from pycat.core import Window, Sprite
 from enum import Enum, auto
 
