@@ -101,13 +101,7 @@ def key(key: KeyCode):
                     print('you lose')
 
 
-#def auto_guess():#not finished
-    #print('guess')
-    #Scheduler.wait(1, auto_guess)
-
-
 code = SecretCode()
 ColorChooser()
 guess = Guess()
-#Scheduler.wait(1, auto_guess)#not finished
 w.run(on_key_press=key)
