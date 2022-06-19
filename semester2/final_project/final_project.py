@@ -1,8 +1,11 @@
-from pycat.core import Window, Sprite, Color, Scheduler, Label, KeyCode
+from re import X
+from turtle import position
+from pycat.core import Window, Sprite, Color, Scheduler, Label, KeyCode, RotationMode
 from enum import Enum, auto
-from random import choice, randint
+from random import choice, randint, random
 from os.path import dirname
 
+from sympy import rotations
 
 w = Window(enforce_window_limits=False)
 
@@ -24,6 +27,8 @@ class BossState1(Enum):
     ATTACK5 = auto()
     ATTACK6 = auto()
 
+bossattack1 = [BossState1.ATTACK1,BossState1.ATTACK2,BossState1.ATTACK3,BossState1.ATTACK4,BossState1.ATTACK5]
+
 
 
 class HollowKnight(Sprite):
@@ -31,15 +36,23 @@ class HollowKnight(Sprite):
 
     def on_create(self):
         self.scale = 50
-        self.color = Color.RED
+        self.color = Color.AMBER
         self.state = PlayerState.JUMP
         self.g = 0.2
         self.y_speed = 0
         self.jump_time = 0
         self.speed = 10
+        self.rotation = 90
+        self.rotation_mode = RotationMode
     
     def on_update(self, dt):
-        
+        if w.is_key_down(KeyCode.X):
+            self.x += 200*self.rotation/90
+        if w.is_key_down(KeyCode.SPACE):
+            self.color = Color.PURPLE
+            if self.is_touching_sprite(boss1):
+                boss1.life += -1
+            self.color = Color.AMBER
         if self.state is PlayerState.JUMP:
             self.y -= self.y_speed
             if w.is_key_pressed(KeyCode.RIGHT) or w.is_key_pressed(KeyCode.LEFT):
@@ -61,7 +74,6 @@ class HollowKnight(Sprite):
                 self.y_speed = -8
                 self.jump_time += 1
             if self.move_left_right_if_press_keys():
-                print("-------------------------------------------------")
                 self.state = PlayerState.WALK
         
         # walk state
@@ -88,21 +100,21 @@ class HollowKnight(Sprite):
                 self.jump_time = 0
 
         if w.is_key_down(KeyCode.SPACE):
-            self.color = Color.AMBER
             self.add_tag('attack')
         else:
-            self.color = Color.RED
+            self.color = Color.AMBER
             if 'attack' in self.tags:
                 self.remove_tag('attack')
-        print(self.state)
 
 
     def move_left_right_if_press_keys(self):
         if w.is_key_pressed(KeyCode.LEFT):
             self.x -= self.speed
+            self.rotation = -90
             return True
         if w.is_key_pressed(KeyCode.RIGHT):
             self.x += self.speed
+            self.rotation = 90
             return True
         return False
 
@@ -121,22 +133,84 @@ class Backgound_floor(Sprite):
 class PureVessel(Sprite):
 
     def on_create(self):
-        self.height = 200
-        self.width = 50
+        self.life = 40
+        self.height = 100
+        self.width = 100
         self.color = Color.CYAN
-        self.state = BossState1.ATTACK1
+        self.state = BossState1.WAIT
+        self.time = 0
+        self.rotation_mode = RotationMode
+        self.way = -1
 
     def on_update(self, dt):
-        self.time = 0
-        #if self.state is BossState1.WAIT:
-            #self.time += dt
-            #if self.time > 1.5:
-                #self.state = 
-        if self.state is BossState1.ATTACK1:
-            self.time = 0
-            self.x += 50
+        if self.life < 1:
+            self.delete()
+        if self.x > 1800:
+            self.x = 1800
+        if self.x < -100:
+            self.x = -100
+        if self.y < 100:
+            self.y = 100
+        if self.state is BossState1.WAIT:
+            self.color = Color.CYAN
+            self.time += dt
+            if self.time > 0.5:
+                self.color = Color.RED
             if self.time > 1:
-                self.x += 50
+                self.state = choice(bossattack1)
+                if player.x < self.x:
+                    self.way = -1
+                else:
+                    self.way = 1
+                if self.state is BossState1.ATTACK5:
+                    self.x = player.x
+                    self.y = 500
+                self.time = 0
+        if self.state is BossState1.ATTACK1:
+            self.x += 6*self.way
+            self.time += dt
+            self.color = Color.PURPLE
+            if self.time > 0.7:
+                self.state = BossState1.WAIT
+                self.time = 0
+        if self.state is BossState1.ATTACK2:
+            self.x += 20*self.way
+            self.time += dt
+            self.color = Color.PURPLE
+            if self.time > 0.5:
+                self.state = BossState1.WAIT
+                self.time = 0
+        if self.state is BossState1.ATTACK3:
+            w.create_sprite(Bullet, rotation = self.way*90, position=self.position)
+            self.time += dt
+            if self.time > 0.5:
+                self.state = BossState1.WAIT
+                self.time = 0
+        if self.state is BossState1.ATTACK4:
+            self.x = player.x
+            self.state = BossState1.WAIT
+        if self.state is BossState1.ATTACK5:
+            self.y += -10
+            self.time += dt
+            self.color = Color.PURPLE
+            if self.time > 0.7:
+                self.y = 100
+                self.state = BossState1.WAIT
+                self.time = 0
+        print(self.scale)
+
+class Bullet(Sprite):
+
+
+    def on_create(self):
+        self.scale = 30
+        self.color = Color.PURPLE
+        self.time = 0
+    def on_update(self, dt):
+        self.x += 10*self.rotation/90
+        self.time += dt
+        if self.is_touching_window_edge():
+            self.delete()
 
         
 
@@ -145,7 +219,7 @@ class PureVessel(Sprite):
 
 
 player = w.create_sprite(HollowKnight, x=200, y=300)
-boss1 = w.create_sprite(PureVessel, x=800, y=200)
+boss1 = w.create_sprite(PureVessel, x=800, y=100)
 backgound_floor = w.create_sprite(Backgound_floor, x=500, y=-100)
 
 
