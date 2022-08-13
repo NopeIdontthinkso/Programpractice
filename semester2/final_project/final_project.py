@@ -1,13 +1,15 @@
-from re import X
-from turtle import position
 from pycat.core import Window, Sprite, Color, Scheduler, Label, KeyCode, RotationMode
 from enum import Enum, auto
-from random import choice, randint, random
+from random import choice
 from os.path import dirname
 
-from sympy import rotations
 
 w = Window(enforce_window_limits=False)
+
+
+time = 0
+with open(dirname(__file__) + '/fastest_time_sealedvessel.txt', 'r') as file:
+    fastest_time = int(file.readline())
 
 
 class PlayerState(Enum):
@@ -30,6 +32,55 @@ class BossState1(Enum):
 bossattack1 = [BossState1.ATTACK1,BossState1.ATTACK2,BossState1.ATTACK3,BossState1.ATTACK4,BossState1.ATTACK5]
 
 
+class Health(Label):
+
+    def on_update(self, dt):
+        self.text = 'HP:' + str(player.health)
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
+
+    
+class BossHealth(Label):
+
+    def on_update(self, dt):
+        self.text = 'BOSS:' + str(boss1.health)
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
+
+
+class Time(Label):
+
+    def on_create(self):
+        self.d = 0
+
+    def on_update(self, dt):
+        global time
+        self.d += dt
+        if self.d > 1:
+            time += 1
+            self.d = 0
+        self.text = 'Time:' + str(time)
+
+
+class FastestTime(Label):
+
+    def on_create(self):
+        self.text = 'FastestTime:' + str(fastest_time)
+
+
+
+class End1(Label):
+
+    def on_create(self):
+        self.text = 'YOU WIN'
+
+
+class End2(Label):
+
+    def on_create(self):
+        self.text = 'YOU LOSE'
+
+
 
 class HollowKnight(Sprite):
 
@@ -44,14 +95,20 @@ class HollowKnight(Sprite):
         self.speed = 10
         self.rotation = 90
         self.rotation_mode = RotationMode
+        self.health = 100
     
     def on_update(self, dt):
+        if self.health < 1:
+            w.create_label(End2, x=300, y=400, font_size=100)
+            self.delete()
+        if boss1.health < 1:
+            self.delete()
         if w.is_key_down(KeyCode.X):
             self.x += 200*self.rotation/90
         if w.is_key_down(KeyCode.SPACE):
             self.color = Color.PURPLE
             if self.is_touching_sprite(boss1):
-                boss1.life += -1
+                boss1.health += -1
             self.color = Color.AMBER
         if self.state is PlayerState.JUMP:
             self.y -= self.y_speed
@@ -128,12 +185,12 @@ class Backgound_floor(Sprite):
         self.add_tag('floor')
 
     def on_update(self, dt):
-        pass
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
 
 class PureVessel(Sprite):
 
     def on_create(self):
-        self.life = 40
         self.height = 100
         self.width = 100
         self.color = Color.CYAN
@@ -141,9 +198,17 @@ class PureVessel(Sprite):
         self.time = 0
         self.rotation_mode = RotationMode
         self.way = -1
+        self.health = 40
 
     def on_update(self, dt):
-        if self.life < 1:
+        if self.health < 1:
+            w.create_label(End1, x=300, y=400, font_size=100)
+            if time < fastest_time:
+                with open(dirname(__file__) + '/fastest_time_sealedvessel.txt', 'w') as file:
+                    fastest_time = time
+                    file.write(str(fastest_time))
+            self.delete()
+        if player.health < 1:
             self.delete()
         if self.x > 1800:
             self.x = 1800
@@ -170,6 +235,8 @@ class PureVessel(Sprite):
             self.x += 6*self.way
             self.time += dt
             self.color = Color.PURPLE
+            if self.is_touching_sprite(player):
+                player.health += -1
             if self.time > 0.7:
                 self.state = BossState1.WAIT
                 self.time = 0
@@ -177,11 +244,13 @@ class PureVessel(Sprite):
             self.x += 20*self.way
             self.time += dt
             self.color = Color.PURPLE
+            if self.is_touching_sprite(player):
+                player.health += -1
             if self.time > 0.5:
                 self.state = BossState1.WAIT
                 self.time = 0
         if self.state is BossState1.ATTACK3:
-            w.create_sprite(Bullet, rotation = self.way*90, position=self.position)
+            w.create_sprite(Bullet, position=self.position)
             self.time += dt
             if self.time > 0.5:
                 self.state = BossState1.WAIT
@@ -193,11 +262,12 @@ class PureVessel(Sprite):
             self.y += -10
             self.time += dt
             self.color = Color.PURPLE
+            if self.is_touching_sprite(player):
+                player.health += -1
             if self.time > 0.7:
                 self.y = 100
                 self.state = BossState1.WAIT
                 self.time = 0
-        print(self.scale)
 
 class Bullet(Sprite):
 
@@ -206,9 +276,15 @@ class Bullet(Sprite):
         self.scale = 30
         self.color = Color.PURPLE
         self.time = 0
+        self.rotation = boss1.way*90
     def on_update(self, dt):
         self.x += 10*self.rotation/90
         self.time += dt
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
+        if self.is_touching_sprite(player):
+            player.health += -1
+            self.delete()
         if self.is_touching_window_edge():
             self.delete()
 
@@ -217,7 +293,10 @@ class Bullet(Sprite):
 
             
 
-
+hp = w.create_label(Health)
+bosshp = w.create_label(BossHealth, y=600)
+timelabel = w.create_label(Time, y=bosshp.y*2-hp.y)
+fastesttimelabel = w.create_label(FastestTime, y=timelabel.y*2-bosshp.y)
 player = w.create_sprite(HollowKnight, x=200, y=300)
 boss1 = w.create_sprite(PureVessel, x=800, y=100)
 backgound_floor = w.create_sprite(Backgound_floor, x=500, y=-100)
