@@ -1,4 +1,4 @@
-from pycat.core import Window, Sprite, Color, Scheduler, Label, KeyCode, RotationMode
+from pycat.core import Window, Sprite, Color, Label, KeyCode, RotationMode
 from enum import Enum, auto
 from random import choice
 from os.path import dirname
@@ -60,12 +60,16 @@ class Time(Label):
             time += 1
             self.d = 0
         self.text = 'Time:' + str(time)
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
 
 
 class FastestTime(Label):
 
     def on_create(self):
         self.text = 'FastestTime:' + str(fastest_time)
+        if player.health < 1 or boss1.health < 1:
+            self.delete()
 
 
 
