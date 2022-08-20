@@ -68,6 +68,7 @@ class FastestTime(Label):
 
     def on_create(self):
         self.text = 'FastestTime:' + str(fastest_time)
+    def on_update(self, dt):
         if player.health < 1 or boss1.health < 1:
             self.delete()
 
