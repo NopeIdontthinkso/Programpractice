@@ -1,4 +1,4 @@
-from pycat.core import Window,Sprite,Color,Scheduler,KeyCode
+from pycat.core import Window,Sprite,Scheduler,KeyCode
 from random import randint
 
 
@@ -39,7 +39,7 @@ class Bird(Sprite):
         if w.is_key_down(KeyCode.SPACE):
             self.fall = -10.5/b
         if self.is_touching_any_sprite_with_tag('pipe'):
-            w.close() 
+            w.close()
             
 
 db = 0.05
@@ -63,7 +63,6 @@ def pipecreate2(dt):
 
 w.create_sprite(Bird)
 Scheduler.update(pipecreate, b)
-
 
 
 w.run()

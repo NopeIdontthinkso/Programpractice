@@ -1,4 +1,4 @@
-from pycat.core import Window, Sprite, Color, KeyCode, Scheduler
+from pycat.core import Window, Sprite, Color, KeyCode
 from random import choice
 
 
