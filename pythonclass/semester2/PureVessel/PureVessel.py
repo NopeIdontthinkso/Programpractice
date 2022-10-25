@@ -108,9 +108,9 @@ class HollowKnight(Sprite):
             self.delete()
         if boss1.health < 1:
             self.delete()
-        if w.is_key_down(KeyCode.X):
+        if w.is_key_down(KeyCode.C):
             self.x += 200*self.rotation/90
-        if w.is_key_down(KeyCode.SPACE):
+        if w.is_key_down(KeyCode.X):
             self.color = Color.PURPLE
             if self.is_touching_sprite(boss1):
                 boss1.health += -1
@@ -119,7 +119,7 @@ class HollowKnight(Sprite):
             self.y -= self.y_speed
             if w.is_key_pressed(KeyCode.RIGHT) or w.is_key_pressed(KeyCode.LEFT):
                 self.state = PlayerState.FLY
-            if w.is_key_down(KeyCode.UP) and self.jump_time < 2:
+            if w.is_key_down(KeyCode.Z) and self.jump_time < 2:
                 self.y_speed = -8
                 self.jump_time += 1
             if self.y_speed < 10:
@@ -131,7 +131,7 @@ class HollowKnight(Sprite):
 
         # wait state
         if self.state is PlayerState.WAIT:
-            if w.is_key_down(KeyCode.UP):
+            if w.is_key_down(KeyCode.Z):
                 self.state = PlayerState.JUMP
                 self.y_speed = -8
                 self.jump_time += 1
@@ -140,7 +140,7 @@ class HollowKnight(Sprite):
         
         # walk state
         if self.state is PlayerState.WALK:
-            if w.is_key_pressed(KeyCode.UP):
+            if w.is_key_pressed(KeyCode.Z):
                 self.state = PlayerState.FLY
             if not self.move_left_right_if_press_keys():
                 self.state = PlayerState.WAIT
@@ -148,7 +148,7 @@ class HollowKnight(Sprite):
         # fly 
         if self.state is PlayerState.FLY:
             self.y -= self.y_speed
-            if w.is_key_down(KeyCode.UP) and self.jump_time < 2:
+            if w.is_key_down(KeyCode.Z) and self.jump_time < 2:
                 self.y_speed = -8
                 self.jump_time += 1
             if self.y_speed < 10:
@@ -161,7 +161,7 @@ class HollowKnight(Sprite):
                 self.y_speed = 0
                 self.jump_time = 0
 
-        if w.is_key_down(KeyCode.SPACE):
+        if w.is_key_down(KeyCode.X):
             self.add_tag('attack')
         else:
             self.color = Color.AMBER
