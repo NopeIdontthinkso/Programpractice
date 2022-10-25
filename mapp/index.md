@@ -6,19 +6,20 @@ by Jevil
 ![game](vid.gif)
 ## Introduction
 
-玩家要在九個房間中不斷穿梭，尋找出現的敵人並將其擊殺獲取分數
+Players have to constantly shuttle in nine rooms, looking for enemies that appear and killing them to get points.
 
 ---
 
 ## Implementation Details
 
-我使用了python和pycat去製作這個遊戲
-在Pycat我使用了``Color``, ``KeyCode``, ``Sprite``, ``Window``, ``Scheduler``,和``Label`` 的定義
-也用了random裡的randint，我使用的技巧有inheritance, iteration, lists, conditionals, variables, functions, etc.
 
-最難的的部分是如何做出牆的變化和從房間A的特定方向進入房間B之邏輯運算，實際上整個迷宮是同樣的九個大方塊重複呈現而已
+This model is made in pycat and python.
+I import ``Color``, ``KeyCode``, ``Sprite``, ``Window``, ``Scheduler``,and``Label`` from pycat.
+Also import randint from random, the tricks I used include inheritance, iteration, lists, conditionals, variables, functions, etc.
 
-這是進入下一個房間的判斷式
+The hardest part is how to make the change of the wall and the logical operation of entering room B from a specific direction in room A. In fact, the entire maze is just repeated presentation of the same nine large squares in different way.
+
+This is the judgmental formula for entering the next room.
 
     ``` Python
     def nextroom(room , dir):
@@ -43,7 +44,7 @@ by Jevil
             return {'left': 8, 'right': room, 'up' : 6, 'down': room}[dir]
     ```
 
-這是牆的顯現程式，寫在'玩家'裡並會偵測當前的房間來改變顯示的特定方塊
+This is the program for the wall.They are written in 'player',and will detect the current room state to change the specific block displayed
 
     ``` Python
     if self.room == 1:
